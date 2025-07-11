@@ -1,44 +1,83 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { PencilDrawing } from './components/PencilDrawing';
-import { ColorPicker } from './components/ColorPicker';
-import { Controls } from './components/Controls';
+import React, { useState } from 'react';
+import { MainMenu } from './components/MainMenu';
+import { GameScreen } from './components/GameScreen';
+import { InstructionsScreen } from './components/InstructionsScreen';
+import { SettingsScreen } from './components/SettingsScreen';
+import { GameOverScreen } from './components/GameOverScreen';
 
-const colors = [
-  "#100c08",
-  "#759BA9", 
-  "#77dd77",
-  "#ff6961",
-  "#ffd1dc"
-];
+export type GameState = 'menu' | 'instructions' | 'settings' | 'game' | 'gameOver';
+
+export interface GameResult {
+  word: string;
+  completed: boolean;
+  timeLeft: number;
+  level: number;
+}
 
 function App() {
-  const [currentColorIndex, setCurrentColorIndex] = useState(0);
-  const drawingRef = useRef<any>(null);
+  const [gameState, setGameState] = useState<GameState>('menu');
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
 
-  const handleClear = () => {
-    drawingRef.current?.clearCanvas();
+  const handleStartGame = () => {
+    setGameState('game');
   };
 
-  const handleSave = () => {
-    drawingRef.current?.savePNG();
+  const handleGameComplete = (result: GameResult) => {
+    setGameResult(result);
+    if (result.completed) {
+      setCurrentLevel(prev => prev + 1);
+    }
+    setGameState('gameOver');
+  };
+
+  const handleBackToMenu = () => {
+    setGameState('menu');
+  };
+
+  const handleNextLevel = () => {
+    setGameState('game');
+  };
+
+  const handleRetry = () => {
+    setGameState('game');
   };
 
   return (
     <div className="app">
-      <PencilDrawing 
-        ref={drawingRef}
-        colors={colors}
-        currentColorIndex={currentColorIndex}
-      />
-      <ColorPicker 
-        colors={colors}
-        currentColorIndex={currentColorIndex}
-        onColorChange={setCurrentColorIndex}
-      />
-      <Controls 
-        onClear={handleClear}
-        onSave={handleSave}
-      />
+      {gameState === 'menu' && (
+        <MainMenu 
+          onStartGame={handleStartGame}
+          onInstructions={() => setGameState('instructions')}
+          onSettings={() => setGameState('settings')}
+          currentLevel={currentLevel}
+        />
+      )}
+      
+      {gameState === 'instructions' && (
+        <InstructionsScreen onBack={handleBackToMenu} />
+      )}
+      
+      {gameState === 'settings' && (
+        <SettingsScreen onBack={handleBackToMenu} />
+      )}
+      
+      {gameState === 'game' && (
+        <GameScreen 
+          level={currentLevel}
+          onGameComplete={handleGameComplete}
+          onBackToMenu={handleBackToMenu}
+        />
+      )}
+      
+      {gameState === 'gameOver' && gameResult && (
+        <GameOverScreen 
+          result={gameResult}
+          onNextLevel={handleNextLevel}
+          onRetry={handleRetry}
+          onBackToMenu={handleBackToMenu}
+        />
+      )}
     </div>
   );
 }

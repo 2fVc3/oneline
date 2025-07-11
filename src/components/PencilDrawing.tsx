@@ -3,12 +3,13 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 interface PencilDrawingProps {
-  colors: string[];
-  currentColorIndex: number;
+  onDrawingStart?: () => void;
+  onDrawingEnd?: () => void;
+  gameActive?: boolean;
 }
 
 export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
-  ({ colors, currentColorIndex }, ref) => {
+  ({ onDrawingStart, onDrawingEnd, gameActive = true }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene>();
     const rendererRef = useRef<THREE.WebGLRenderer>();
@@ -105,10 +106,6 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       return current < target - 0.004 || current > target + 0.004;
     };
 
-    const getRandomInt = (min: number, max: number) => {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-
     const distanceBetween = (point1: {x: number, y: number}, point2: {x: number, y: number}) => {
       return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
     };
@@ -184,20 +181,15 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       loader.load('/src/model/pencil.glb', (gltf) => {
         const pencilGroup = gltf.scene;
         
-        // Scale down the pencil to realistic handheld size
         pencilGroup.scale.set(0.15, 0.15, 0.15);
         
-        // Enable shadows for all meshes in the model
         pencilGroup.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.castShadow = true;
           }
         });
 
-        // Set initial rotation - pencil tip pointing down, eraser pointing up
-        // First rotate to point downward
         rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(90));
-        // Then tilt slightly for natural writing angle
         rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(-15));
         rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(-10));
 
@@ -210,40 +202,32 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
 
         pencilRef.current = pencilGroup;
         scene.add(pencilGroup);
-
-        // Start animation after model is loaded
         animate();
       }, undefined, (error) => {
         console.error('Error loading pencil model:', error);
-        // Fallback to basic pencil if model fails to load
         createFallbackPencil();
       });
 
-      // Fallback pencil creation function
       const createFallbackPencil = () => {
         const pencilGroup = new THREE.Group();
         
-        // Pencil body (cylinder)
         const bodyGeometry = new THREE.CylinderGeometry(0.03, 0.03, 1.5, 8);
         const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xff4500 });
         const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
         body.castShadow = true;
         
-        // Pencil tip (cone)
         const tipGeometry = new THREE.ConeGeometry(0.03, 0.2, 8);
         const tipMaterial = new THREE.MeshPhongMaterial({ color: 0x8b4513 });
         const tip = new THREE.Mesh(tipGeometry, tipMaterial);
         tip.position.set(0, 0.85, 0);
         tip.castShadow = true;
         
-        // Pencil eraser (cylinder)
         const eraserGeometry = new THREE.CylinderGeometry(0.035, 0.035, 0.1, 8);
         const eraserMaterial = new THREE.MeshPhongMaterial({ color: 0xffc0cb });
         const eraser = new THREE.Mesh(eraserGeometry, eraserMaterial);
         eraser.position.set(0, -0.8, 0);
         eraser.castShadow = true;
         
-        // Metal band
         const bandGeometry = new THREE.CylinderGeometry(0.035, 0.035, 0.05, 8);
         const bandMaterial = new THREE.MeshPhongMaterial({ color: 0xc0c0c0 });
         const band = new THREE.Mesh(bandGeometry, bandMaterial);
@@ -255,10 +239,7 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         pencilGroup.add(eraser);
         pencilGroup.add(band);
         
-        // Scale down the fallback pencil too
         pencilGroup.scale.set(0.15, 0.15, 0.15);
-        
-        // Initial pencil rotation - tip pointing down, eraser pointing up
         
         pencilDefaultPosRef.current = {
           height: 0.08,
@@ -291,9 +272,11 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
 
       // Event handlers
       const handleMouseDown = (e: MouseEvent | TouchEvent) => {
-        if ((e.target as HTMLElement).tagName !== 'CANVAS') return;
+        if (!gameActive || (e.target as HTMLElement).tagName !== 'CANVAS') return;
         
         isDrawingRef.current = true;
+        onDrawingStart?.();
+        
         pencilTargetPosRef.current.height = 0.02;
         pencilTargetPosRef.current.heightRotate = 0.2;
         pencilPathTargetRef.current.thickness = pencilPathDefaultsRef.current.maxThickness;
@@ -301,12 +284,11 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         const xPos = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const yPos = 'touches' in e ? e.touches[0].clientY : e.clientY;
         
-        // Calculate pencil tip offset to align drawing with pencil tip exactly
-        const pencilTipOffset = { x: 45, y: -25 }; // Adjusted to match exact tip position
+        const pencilTipOffset = { x: 45, y: -25 };
         const currentPoint = { x: xPos + pencilTipOffset.x, y: yPos + pencilTipOffset.y };
         
         drawingCtx.beginPath();
-        drawingCtx.fillStyle = colors[currentColorIndex];
+        drawingCtx.fillStyle = '#100c08';
         drawingCtx.globalAlpha = 0.9;
         drawingCtx.arc(
           currentPoint.x, currentPoint.y, pencilPathDefaultsRef.current.thickness,
@@ -318,8 +300,12 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       };
 
       const handleMouseUp = () => {
+        if (!gameActive) return;
+        
         newlyUpRef.current = true;
         isDrawingRef.current = false;
+        onDrawingEnd?.();
+        
         pencilTargetPosRef.current.height = 0.08;
         pencilTargetPosRef.current.heightRotate = 0;
         pencilPathTargetRef.current.thickness = pencilPathDefaultsRef.current.minThickness;
@@ -330,6 +316,8 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       };
 
       const handleMouseMove = (e: MouseEvent | TouchEvent) => {
+        if (!gameActive) return;
+        
         e.preventDefault();
         
         const xPos = 'touches' in e ? e.touches[0].clientX : e.clientX;
@@ -338,15 +326,13 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         mouseRef.current.x = (xPos / window.innerWidth) * 2 - 1;
         mouseRef.current.y = -(yPos / window.innerHeight) * 2 + 1;
         
-        // Consistent offset to match pencil tip position exactly
-        const pencilTipOffset = { x: 45, y: -25 }; // Matches exact tip position
+        const pencilTipOffset = { x: 45, y: -25 };
         
         if (!lastPointRef.current) {
           lastPointRef.current = { x: xPos + pencilTipOffset.x, y: yPos + pencilTipOffset.y };
         }
         
-        // 3D position follows mouse directly for precise alignment
-        const positionOffset = { x: 0, y: 0 }; // No offset for perfect alignment
+        const positionOffset = { x: 0, y: 0 };
           
         const vector = new THREE.Vector3(
           mouseRef.current.x + positionOffset.x, 
@@ -384,7 +370,7 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
             const y = lastPoint.y + Math.cos(angle) * i;
             
             drawingCtx.beginPath();
-            drawingCtx.fillStyle = colors[currentColorIndex];
+            drawingCtx.fillStyle = '#100c08';
             drawingCtx.globalAlpha = 0.15 + Math.random() * 0.1;
             drawingCtx.arc(
               x, y, pencilPathCurrentRef.current.thickness,
@@ -414,19 +400,15 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       const animate = () => {
         if (!pencilRef.current) return;
         
-        // Update pencil position
         pencilPosRef.current.height += (pencilTargetPosRef.current.height - pencilPosRef.current.height) * 0.2;
         
         pencilRef.current.position.copy(mousePosRef.current);
-        // Fine-tune pencil position to align tip with drawing point
-        pencilRef.current.position.x -= 0.1; // Adjust X to align tip
-        pencilRef.current.position.y += 0.1; // Adjust Y to align tip
+        pencilRef.current.position.x -= 0.1;
+        pencilRef.current.position.y += 0.1;
         pencilRef.current.position.z += pencilPosRef.current.height;
         
-        // Update pencil thickness
         pencilPathCurrentRef.current.thickness += (pencilPathTargetRef.current.thickness - pencilPathCurrentRef.current.thickness) * 0.2;
         
-        // Update pencil rotation
         if (isNotClose(pencilPosRef.current.xRotate, pencilTargetPosRef.current.xRotate)) {
           const newRotate = (pencilTargetPosRef.current.xRotate - pencilPosRef.current.xRotate) * 0.2;
           pencilPosRef.current.xRotate += Math.round(newRotate * 1000) / 1000;
@@ -478,7 +460,7 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         
         renderer.dispose();
       };
-    }, [colors, currentColorIndex]);
+    }, [gameActive, onDrawingStart, onDrawingEnd]);
 
     return <div ref={containerRef} className="pencil-drawing-container" />;
   }
