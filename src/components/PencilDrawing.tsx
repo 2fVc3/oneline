@@ -194,11 +194,12 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
           }
         });
 
-        // Set initial rotation to match the original design - pencil pointing down and to the right
+        // Set initial rotation - pencil tip pointing down, eraser pointing up
+        // First rotate to point downward
         rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(90));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(-50));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(10));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(35));
+        // Then tilt slightly for natural writing angle
+        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(-15));
+        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(-10));
 
         pencilDefaultPosRef.current = {
           height: 0.08,
@@ -257,11 +258,7 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         // Scale down the fallback pencil too
         pencilGroup.scale.set(0.15, 0.15, 0.15);
         
-        // Initial pencil rotation - pencil pointing down and to the right
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(90));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(-20));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(10));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(-5));
+        // Initial pencil rotation - tip pointing down, eraser pointing up
         
         pencilDefaultPosRef.current = {
           height: 0.08,
@@ -283,7 +280,7 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       drawingCanvas.style.left = '0';
       drawingCanvas.style.top = '0';
       drawingCanvas.style.zIndex = '1';
-      drawingCanvas.style.cursor = 'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMyIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KPC9zdmc+"), auto';
+      drawingCanvas.style.cursor = 'none';
       
       const drawingCtx = drawingCanvas.getContext('2d')!;
       drawingCanvasRef.current = drawingCanvas;
@@ -304,8 +301,8 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         const xPos = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const yPos = 'touches' in e ? e.touches[0].clientY : e.clientY;
         
-        // Calculate pencil tip offset to align drawing with pencil tip when drawing
-        const pencilTipOffset = { x: -35, y: 35 }; // Larger offset when drawing to match tip position
+        // Calculate pencil tip offset to align drawing with pencil tip exactly
+        const pencilTipOffset = { x: 45, y: -25 }; // Adjusted to match exact tip position
         const currentPoint = { x: xPos + pencilTipOffset.x, y: yPos + pencilTipOffset.y };
         
         drawingCtx.beginPath();
@@ -341,19 +338,15 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         mouseRef.current.x = (xPos / window.innerWidth) * 2 - 1;
         mouseRef.current.y = -(yPos / window.innerHeight) * 2 + 1;
         
-        // Different offsets for hovering vs drawing
-        const pencilTipOffset = isDrawingRef.current || newlyUpRef.current 
-          ? { x: -35, y: 35 }  // Drawing position - tip touches paper
-          : { x: -20, y: 20 }; // Hovering position - pencil held higher
+        // Consistent offset to match pencil tip position exactly
+        const pencilTipOffset = { x: 45, y: -25 }; // Matches exact tip position
         
         if (!lastPointRef.current) {
           lastPointRef.current = { x: xPos + pencilTipOffset.x, y: yPos + pencilTipOffset.y };
         }
         
-        // Adjust 3D position based on drawing state
-        const positionOffset = isDrawingRef.current 
-          ? { x: 0.08, y: -0.08 }  // When drawing, position closer to actual mouse
-          : { x: 0.05, y: -0.05 }; // When hovering, slight offset
+        // 3D position follows mouse directly for precise alignment
+        const positionOffset = { x: 0, y: 0 }; // No offset for perfect alignment
           
         const vector = new THREE.Vector3(
           mouseRef.current.x + positionOffset.x, 
@@ -425,8 +418,9 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         pencilPosRef.current.height += (pencilTargetPosRef.current.height - pencilPosRef.current.height) * 0.2;
         
         pencilRef.current.position.copy(mousePosRef.current);
-        pencilRef.current.position.x += pencilPosRef.current.height * 0.3;
-        pencilRef.current.position.y += pencilPosRef.current.height * 0.3;
+        // Fine-tune pencil position to align tip with drawing point
+        pencilRef.current.position.x -= 0.1; // Adjust X to align tip
+        pencilRef.current.position.y += 0.1; // Adjust Y to align tip
         pencilRef.current.position.z += pencilPosRef.current.height;
         
         // Update pencil thickness
