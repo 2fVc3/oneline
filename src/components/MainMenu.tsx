@@ -1,10 +1,12 @@
 import React from 'react';
-import { Play, BookOpen, Settings, Trophy } from 'lucide-react';
+import { Play, BookOpen, Settings, Trophy, Palette, FileText } from 'lucide-react';
 
 interface MainMenuProps {
   onStartGame: () => void;
   onInstructions: () => void;
   onSettings: () => void;
+  onMyDrawings: () => void;
+  onMyWords: () => void;
   currentLevel: number;
 }
 
@@ -12,6 +14,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   onStartGame, 
   onInstructions, 
   onSettings, 
+  onMyDrawings,
+  onMyWords,
   currentLevel 
 }) => {
   return (
@@ -42,6 +46,18 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             <Settings className="button-icon" />
             Settings
           </button>
+          
+          <div className="menu-row">
+            <button className="sketch-button secondary small-button" onClick={onMyDrawings}>
+              <Palette className="button-icon" />
+              My Drawings
+            </button>
+            
+            <button className="sketch-button secondary small-button" onClick={onMyWords}>
+              <FileText className="button-icon" />
+              My Words
+            </button>
+          </div>
         </div>
         
         <div className="menu-decoration">

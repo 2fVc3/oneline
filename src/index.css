@@ -15,7 +15,7 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: hidden; /* Prevent scrollbars */
   touch-action: none;
   font-size: 16px;
 }
@@ -25,7 +25,7 @@ body {
   font-family: 'Kalam', 'Galano Grotesque Semi Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: hidden; /* Prevent scrollbars */
   width: 100%;
   height: 100%;
   font-size: 16px;
@@ -38,7 +38,8 @@ button {
 .app {
   width: 100vw;
   height: 100vh;
-  min-height: 100dvh;
+  min-height: 100vh;
+  max-height: 100vh; /* Prevent overflow */
   position: relative;
   background-color: #f7f4f0;
   overflow: hidden;
@@ -49,6 +50,7 @@ button {
   width: 100%;
   height: 100%;
   min-height: 100vh;
+  max-height: 100vh; /* Prevent overflow */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,18 +63,23 @@ button {
   text-align: center;
   z-index: 10;
   position: relative;
-  padding: 1rem;
-  max-width: 90vw;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  max-width: min(400px, 90vw);
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .game-title {
-  margin-bottom: 3rem;
+  margin-bottom: clamp(1rem, 4vw, 2rem);
 }
 
 .title-text {
   font-family: 'Caveat', cursive;
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-size: clamp(2rem, 6vw, 3.5rem);
   font-weight: 700;
   color: #2d2d2d;
   margin: 0;
@@ -95,9 +102,9 @@ button {
 
 .subtitle-text {
   font-family: 'Kalam', cursive;
-  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
   color: #666;
-  margin: 1rem 0 0 0;
+  margin: clamp(0.5rem, 2vw, 1rem) 0 0 0;
   transform: rotate(1deg);
 }
 
@@ -106,8 +113,8 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 2rem;
-  padding: 0.75rem 1.5rem;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
   background: rgba(255, 255, 255, 0.8);
   border: 2px solid #2d2d2d;
   border-radius: 20px;
@@ -129,23 +136,37 @@ button {
 .level-text {
   font-family: 'Kalam', cursive;
   font-weight: 600;
-  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  font-size: clamp(0.9rem, 2vw, 1rem);
   color: #2d2d2d;
 }
 
 .menu-buttons {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.5rem, 2vw, 0.75rem);
   align-items: center;
   width: 100%;
+}
+
+.menu-row {
+  display: flex;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.small-button {
+  min-width: clamp(120px, 25vw, 150px) !important;
+  flex: 1;
+  max-width: 180px;
 }
 
 /* Sketch Button Styles */
 .sketch-button {
   font-family: 'Kalam', cursive;
   font-weight: 500;
-  padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+  padding: clamp(0.6rem, 2vw, 0.8rem) clamp(1.2rem, 3vw, 1.5rem);
   border: 3px solid #2d2d2d;
   background: #fff;
   color: #2d2d2d;
@@ -155,11 +176,11 @@ button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  font-size: clamp(0.9rem, 2vw, 1rem);
   position: relative;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
   transform: rotate(-1deg);
-  min-width: 200px;
+  min-width: clamp(180px, 40vw, 250px);
   justify-content: center;
 }
 
@@ -196,24 +217,24 @@ button {
 }
 
 .sketch-button.small {
-  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.8rem, 2vw, 1rem);
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  padding: clamp(0.3rem, 1vw, 0.4rem) clamp(0.6rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
   border-width: 2px;
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
   min-width: auto;
 }
 
 .sketch-button.tiny {
-  padding: clamp(0.2rem, 1vw, 0.25rem) clamp(0.4rem, 1.5vw, 0.5rem);
-  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  padding: clamp(0.2rem, 0.8vw, 0.25rem) clamp(0.3rem, 1vw, 0.4rem);
+  font-size: clamp(0.6rem, 1.5vw, 0.7rem);
   border-width: 2px;
   box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
   min-width: auto;
 }
 
 .sketch-button.large {
-  padding: clamp(1rem, 3vw, 1.25rem) clamp(2rem, 5vw, 2.5rem);
-  font-size: clamp(1.1rem, 3vw, 1.3rem);
+  padding: clamp(0.8rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
   border-width: 4px;
   box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.1);
 }
@@ -240,8 +261,8 @@ button {
 }
 
 .button-icon {
-  width: clamp(1rem, 2.5vw, 1.2rem);
-  height: clamp(1rem, 2.5vw, 1.2rem);
+  width: clamp(0.8rem, 2vw, 1rem);
+  height: clamp(0.8rem, 2vw, 1rem);
 }
 
 /* Menu Decoration */
@@ -524,27 +545,32 @@ button {
   width: 100%;
   height: 100%;
   min-height: 100vh;
+  max-height: 100vh;
   background: linear-gradient(135deg, #f7f4f0 0%, #ede7d9 100%);
   overflow-y: auto;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: clamp(0.5rem, 2vw, 1rem);
+  box-sizing: border-box;
 }
 
 .instructions-container {
-  max-width: min(800px, 95vw);
+  max-width: min(600px, 95vw);
   margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .instructions-header {
   display: flex;
   align-items: center;
   gap: clamp(0.5rem, 2vw, 1rem);
-  margin-bottom: clamp(1rem, 3vw, 2rem);
+  margin-bottom: clamp(0.5rem, 2vw, 1rem);
   flex-wrap: wrap;
 }
 
 .instructions-title {
   font-family: 'Caveat', cursive;
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
   color: #2d2d2d;
   margin: 0;
@@ -553,16 +579,17 @@ button {
 
 .instructions-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: clamp(1rem, 3vw, 1.5rem);
-  margin-bottom: clamp(1rem, 3vw, 2rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: clamp(0.75rem, 2vw, 1rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  flex: 1;
 }
 
 .instruction-card {
   background: rgba(255, 255, 255, 0.9);
   border: 3px solid #2d2d2d;
   border-radius: 20px;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(0.75rem, 2vw, 1rem);
   transform: rotate(-0.5deg);
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
@@ -581,14 +608,14 @@ button {
 }
 
 .instruction-icon {
-  width: clamp(2.5rem, 6vw, 3rem);
-  height: clamp(2.5rem, 6vw, 3rem);
+  width: clamp(2rem, 5vw, 2.5rem);
+  height: clamp(2rem, 5vw, 2.5rem);
   background: #4CAF50;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
   color: white;
   border: 2px solid #2d2d2d;
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
@@ -596,15 +623,15 @@ button {
 
 .instruction-card h3 {
   font-family: 'Caveat', cursive;
-  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
   font-weight: 600;
   color: #2d2d2d;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 clamp(0.25rem, 1vw, 0.5rem) 0;
 }
 
 .instruction-card p {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #666;
   line-height: 1.5;
   margin: 0;
@@ -619,27 +646,32 @@ button {
   width: 100%;
   height: 100%;
   min-height: 100vh;
+  max-height: 100vh;
   background: linear-gradient(135deg, #f7f4f0 0%, #ede7d9 100%);
   overflow-y: auto;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: clamp(0.5rem, 2vw, 1rem);
+  box-sizing: border-box;
 }
 
 .settings-container {
-  max-width: min(600px, 95vw);
+  max-width: min(500px, 95vw);
   margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .settings-header {
   display: flex;
   align-items: center;
   gap: clamp(0.5rem, 2vw, 1rem);
-  margin-bottom: clamp(1rem, 3vw, 2rem);
+  margin-bottom: clamp(0.5rem, 2vw, 1rem);
   flex-wrap: wrap;
 }
 
 .settings-title {
   font-family: 'Caveat', cursive;
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
   color: #2d2d2d;
   margin: 0;
@@ -649,14 +681,16 @@ button {
 .settings-content {
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 3vw, 2rem);
+  gap: clamp(0.75rem, 2vw, 1rem);
+  flex: 1;
+  overflow-y: auto;
 }
 
 .settings-section {
   background: rgba(255, 255, 255, 0.9);
   border: 3px solid #2d2d2d;
   border-radius: 20px;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(0.75rem, 2vw, 1rem);
   transform: rotate(-0.5deg);
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
 }
@@ -667,36 +701,36 @@ button {
 
 .section-title {
   font-family: 'Caveat', cursive;
-  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
   font-weight: 600;
   color: #2d2d2d;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 clamp(0.25rem, 1vw, 0.5rem) 0;
 }
 
 .section-description {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #666;
-  margin: 0 0 1rem 0;
+  margin: 0 0 clamp(0.5rem, 2vw, 0.75rem) 0;
 }
 
 .add-word-container {
   display: flex;
   gap: clamp(0.25rem, 1vw, 0.5rem);
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
   flex-wrap: wrap;
 }
 
 .sketch-input {
   flex: 1;
-  min-width: 200px;
+  min-width: clamp(150px, 40vw, 200px);
   font-family: 'Kalam', cursive;
-  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.8rem, 2vw, 1rem);
+  padding: clamp(0.4rem, 1.5vw, 0.6rem) clamp(0.6rem, 1.5vw, 0.8rem);
   border: 2px solid #2d2d2d;
   border-radius: 10px;
   background: #fff;
   color: #2d2d2d;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   transform: rotate(-0.5deg);
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
 }
@@ -709,7 +743,7 @@ button {
 }
 
 .custom-words-list {
-  max-height: clamp(150px, 30vh, 200px);
+  max-height: clamp(120px, 25vh, 150px);
   overflow-y: auto;
 }
 
@@ -717,11 +751,11 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.8rem, 2vw, 1rem);
+  padding: clamp(0.3rem, 1vw, 0.4rem) clamp(0.6rem, 1.5vw, 0.8rem);
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid #ddd;
   border-radius: 10px;
-  margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
+  margin-bottom: clamp(0.2rem, 0.8vw, 0.3rem);
   transform: rotate(-0.2deg);
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -733,7 +767,7 @@ button {
 
 .word-text {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #2d2d2d;
   font-weight: 500;
   word-break: break-word;
@@ -741,11 +775,11 @@ button {
 
 .empty-state {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #999;
   text-align: center;
   font-style: italic;
-  margin: 1rem 0;
+  margin: clamp(0.5rem, 2vw, 0.75rem) 0;
 }
 
 .info-grid {
@@ -757,7 +791,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(0.4rem, 1.5vw, 0.5rem) 0;
+  padding: clamp(0.3rem, 1vw, 0.4rem) 0;
   border-bottom: 1px solid rgba(45, 45, 45, 0.1);
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -765,13 +799,13 @@ button {
 
 .info-label {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #666;
 }
 
 .info-value {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #2d2d2d;
   font-weight: 600;
 }
@@ -781,36 +815,43 @@ button {
   width: 100%;
   height: 100%;
   min-height: 100vh;
+  max-height: 100vh;
   background: linear-gradient(135deg, #f7f4f0 0%, #ede7d9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 1rem;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  box-sizing: border-box;
 }
 
 .game-over-container {
   text-align: center;
   z-index: 10;
   position: relative;
-  max-width: min(500px, 95vw);
-  padding: clamp(1rem, 3vw, 2rem);
+  max-width: min(400px, 95vw);
+  padding: clamp(0.75rem, 2vw, 1rem);
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .result-header {
-  margin-bottom: clamp(1rem, 3vw, 2rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
 }
 
 .result-icon {
-  width: clamp(3rem, 8vw, 4rem);
-  height: clamp(3rem, 8vw, 4rem);
+  width: clamp(2.5rem, 6vw, 3rem);
+  height: clamp(2.5rem, 6vw, 3rem);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto clamp(0.75rem, 2vw, 1rem);
+  margin: 0 auto clamp(0.5rem, 1.5vw, 0.75rem);
   border: 3px solid #2d2d2d;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
   transform: rotate(-5deg);
@@ -828,53 +869,53 @@ button {
 
 .result-title {
   font-family: 'Caveat', cursive;
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
   color: #2d2d2d;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 clamp(0.25rem, 1vw, 0.5rem) 0;
   transform: rotate(1deg);
 }
 
 .result-subtitle {
   font-family: 'Kalam', cursive;
-  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  font-size: clamp(0.8rem, 2vw, 1rem);
   color: #666;
   margin: 0;
   transform: rotate(-0.5deg);
 }
 
 .result-details {
-  margin-bottom: clamp(1rem, 3vw, 2rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
 }
 
 .result-card {
   background: rgba(255, 255, 255, 0.95);
   border: 3px solid #2d2d2d;
   border-radius: 20px;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(0.75rem, 2vw, 1rem);
   transform: rotate(-1deg);
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 .result-word {
   font-family: 'Caveat', cursive;
-  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
   font-weight: 600;
   color: #2d2d2d;
-  margin: 0 0 clamp(0.75rem, 2vw, 1rem) 0;
+  margin: 0 0 clamp(0.5rem, 1.5vw, 0.75rem) 0;
   word-break: break-word;
 }
 
 .result-stats {
   display: grid;
-  gap: clamp(0.25rem, 1vw, 0.5rem);
+  gap: clamp(0.2rem, 0.8vw, 0.3rem);
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(0.4rem, 1.5vw, 0.5rem) 0;
+  padding: clamp(0.3rem, 1vw, 0.4rem) 0;
   border-bottom: 1px solid rgba(45, 45, 45, 0.1);
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -882,13 +923,13 @@ button {
 
 .stat-label {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #666;
 }
 
 .stat-value {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #2d2d2d;
   font-weight: 600;
 }
@@ -904,7 +945,7 @@ button {
 .result-actions {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.5rem, 1.5vw, 0.75rem);
   align-items: center;
   width: 100%;
 }
@@ -957,54 +998,379 @@ button {
   overflow: hidden;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {  
-  .timer-container {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-  }
-  
-  .instructions-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .game-ui {
-    padding: 0.75rem;
-  }
-  
-  .game-header {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: center;
-  }
-  
-  .menu-buttons {
-    gap: 1rem;
-  }
-  
-  .sketch-button {
-    min-width: 250px;
-    padding: 1rem 1.5rem;
-  }
-  
-  .add-word-container {
-    flex-direction: column;
-  }
-  
-  .sketch-input {
-    min-width: 100%;
-  }
+/* My Drawings Screen */
+.my-drawings-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  max-height: 100vh;
+  background: linear-gradient(135deg, #f7f4f0 0%, #ede7d9 100%);
+  overflow-y: auto;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  .game-ui {
-    padding: 0.5rem;
+.my-drawings-container {
+  max-width: min(800px, 95vw);
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.my-drawings-header {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  margin-bottom: clamp(0.5rem, 2vw, 1rem);
+  flex-wrap: wrap;
+}
+
+.my-drawings-title {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0;
+  transform: rotate(-1deg);
+}
+
+.my-drawings-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.drawings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+  gap: clamp(0.75rem, 2vw, 1rem);
+}
+
+.drawing-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #2d2d2d;
+  border-radius: 20px;
+  padding: clamp(0.75rem, 2vw, 1rem);
+  transform: rotate(-0.5deg);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.drawing-card:nth-child(even) {
+  transform: rotate(0.5deg);
+}
+
+.drawing-card:hover {
+  transform: rotate(-0.5deg) translateY(-2px);
+}
+
+.drawing-preview {
+  width: 100%;
+  height: clamp(100px, 20vw, 120px);
+  background: #f0f0f0;
+  border: 2px solid #2d2d2d;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+}
+
+.drawing-placeholder {
+  text-align: center;
+}
+
+.drawing-word {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  color: #666;
+  font-style: italic;
+}
+
+.drawing-info h3 {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  color: #2d2d2d;
+  margin: 0 0 clamp(0.25rem, 1vw, 0.5rem) 0;
+}
+
+.drawing-date {
+  font-family: 'Kalam', cursive;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  color: #999;
+  margin: 0 0 clamp(0.5rem, 1.5vw, 0.75rem) 0;
+}
+
+.drawing-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: 'Kalam', cursive;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  color: #666;
+}
+
+.stat-icon {
+  width: clamp(0.8rem, 2vw, 1rem);
+  height: clamp(0.8rem, 2vw, 1rem);
+}
+
+.stat.success {
+  color: #4CAF50;
+  font-weight: 600;
+}
+
+.success-rate {
+  font-weight: 700;
+}
+
+.drawing-actions {
+  display: flex;
+  gap: clamp(0.25rem, 1vw, 0.5rem);
+  justify-content: space-between;
+}
+
+/* My Words Screen */
+.my-words-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  max-height: 100vh;
+  background: linear-gradient(135deg, #f7f4f0 0%, #ede7d9 100%);
+  overflow-y: auto;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  box-sizing: border-box;
+}
+
+.my-words-container {
+  max-width: min(700px, 95vw);
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.my-words-header {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  margin-bottom: clamp(0.5rem, 2vw, 1rem);
+  flex-wrap: wrap;
+}
+
+.my-words-title {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0;
+  transform: rotate(-1deg);
+}
+
+.my-words-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.words-section {
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+}
+
+.words-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: clamp(0.75rem, 2vw, 1rem);
+}
+
+.word-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #2d2d2d;
+  border-radius: 15px;
+  padding: clamp(0.75rem, 2vw, 1rem);
+  transform: rotate(-0.3deg);
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.1);
+}
+
+.word-card:nth-child(even) {
+  transform: rotate(0.3deg);
+}
+
+.word-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+  gap: 0.5rem;
+}
+
+.word-title {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  color: #2d2d2d;
+  margin: 0;
+  word-break: break-word;
+  flex: 1;
+}
+
+.word-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.word-stats {
+  display: grid;
+  gap: clamp(0.2rem, 0.8vw, 0.3rem);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Kalam', cursive;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  padding: clamp(0.2rem, 0.8vw, 0.3rem) 0;
+  border-bottom: 1px solid rgba(45, 45, 45, 0.1);
+}
+
+.stat-label {
+  color: #666;
+}
+
+.stat-value {
+  color: #2d2d2d;
+  font-weight: 600;
+}
+
+.stat-value.success {
+  color: #4CAF50;
+}
+
+.stat-value.warning {
+  color: #ffa726;
+}
+
+.stat-value.danger {
+  color: #ff6b6b;
+}
+
+/* Drawing Modal */
+.drawing-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: clamp(0.5rem, 2vw, 1rem);
+}
+
+.modal-content {
+  background: white;
+  border: 3px solid #2d2d2d;
+  border-radius: 20px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  max-width: min(500px, 90vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  transform: rotate(-1deg);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+}
+
+.modal-header h2 {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  color: #2d2d2d;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: clamp(2rem, 5vw, 2.5rem);
+  height: clamp(2rem, 5vw, 2.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.large-drawing-preview {
+  width: 100%;
+  height: clamp(150px, 30vw, 200px);
+  background: #f0f0f0;
+  border: 2px solid #2d2d2d;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+}
+
+.large-drawing-word {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  color: #666;
+  font-style: italic;
+}
+
+.detailed-stats {
+  display: grid;
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: clamp(0.3rem, 1vw, 0.5rem) 0;
+  border-bottom: 1px solid rgba(45, 45, 45, 0.1);
+  font-family: 'Kalam', cursive;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+}
+
+.stat-row span:first-child {
+  color: #666;
+}
+
+.stat-row span:last-child {
+  color: #2d2d2d;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .menu-row {
+    flex-direction: column;
+    align-items: center;
   }
   
-  .game-header {
-    justify-content: center;
-    text-align: center;
+  .small-button {
+    min-width: clamp(200px, 60vw, 250px) !important;
+    max-width: none;
   }
   
   .timer-container {
@@ -1017,28 +1383,96 @@ button {
     align-items: center;
   }
   
-  .sketch-button {
-    min-width: 200px;
-    font-size: 1rem;
+  .instructions-content {
+    grid-template-columns: 1fr;
   }
   
+  .drawings-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  }
+  
+  .words-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+  }
+  
+  .game-ui {
+    padding: clamp(0.5rem, 2vw, 0.75rem);
+  }
+  
+  .game-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  
+  .add-word-container {
+    flex-direction: column;
+  }
+  
+  .sketch-input {
+    min-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
   .menu-container {
-    padding: 0.5rem;
+    padding: clamp(0.5rem, 3vw, 1rem);
   }
   
-  .result-actions {
-    gap: 1rem;
+  .title-text {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
   }
   
-  .stat-item {
+  .subtitle-text {
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
+  }
+  
+  .level-text {
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  }
+  
+  .small-button {
+    min-width: 90% !important;
+  }
+  
+  .drawings-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .words-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-item,
+  .info-item,
+  .stat-row {
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
+    gap: 0.25rem;
   }
   
-  .info-item {
+  .word-header {
     flex-direction: column;
     align-items: flex-start;
-    text-align: left;
+  }
+  
+  .word-actions {
+    align-self: flex-end;
+  }
+  
+  .drawing-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .modal-content {
+    max-width: 95vw;
+    margin: 0.5rem;
+  }
+  
+  .modal-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }

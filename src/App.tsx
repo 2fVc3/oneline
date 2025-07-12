@@ -4,8 +4,10 @@ import { GameScreen } from './components/GameScreen';
 import { InstructionsScreen } from './components/InstructionsScreen';
 import { SettingsScreen } from './components/SettingsScreen';
 import { GameOverScreen } from './components/GameOverScreen';
+import { MyDrawingsScreen } from './components/MyDrawingsScreen';
+import { MyWordsScreen } from './components/MyWordsScreen';
 
-export type GameState = 'menu' | 'instructions' | 'settings' | 'game' | 'gameOver';
+export type GameState = 'menu' | 'instructions' | 'settings' | 'game' | 'gameOver' | 'myDrawings' | 'myWords';
 
 export interface GameResult {
   word: string;
@@ -50,6 +52,8 @@ function App() {
           onStartGame={handleStartGame}
           onInstructions={() => setGameState('instructions')}
           onSettings={() => setGameState('settings')}
+          onMyDrawings={() => setGameState('myDrawings')}
+          onMyWords={() => setGameState('myWords')}
           currentLevel={currentLevel}
         />
       )}
@@ -60,6 +64,14 @@ function App() {
       
       {gameState === 'settings' && (
         <SettingsScreen onBack={handleBackToMenu} />
+      )}
+      
+      {gameState === 'myDrawings' && (
+        <MyDrawingsScreen onBack={handleBackToMenu} />
+      )}
+      
+      {gameState === 'myWords' && (
+        <MyWordsScreen onBack={handleBackToMenu} />
       )}
       
       {gameState === 'game' && (

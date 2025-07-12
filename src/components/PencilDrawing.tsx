@@ -229,7 +229,13 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         e.preventDefault();
         
         isDrawingRef.current = false;
-        onDrawingEnd?.();
+        
+        // Auto-submit drawing when mouse/touch is released
+        if (hasStartedDrawing) {
+          setTimeout(() => {
+            onDrawingEnd?.();
+          }, 100); // Small delay to ensure drawing is complete
+        }
         
         pencilTargetPosRef.current.height = 0.3;
       };
