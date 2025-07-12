@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 interface PencilDrawingProps {
   onDrawingStart?: () => void;
@@ -21,87 +20,43 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
     
     // Drawing state
     const isDrawingRef = useRef(false);
-    const newlyUpRef = useRef(false);
     const lastPointRef = useRef<{x: number, y: number} | null>(null);
     
     // Mouse state
     const mouseRef = useRef({ x: 0, y: 0 });
     const mousePosRef = useRef(new THREE.Vector3(0, 0, 0));
-    const mouseDirectionRef = useRef({ x: 1, y: 1 });
     
     // Pencil state
     const pencilDefaultPosRef = useRef({
-      height: 0.08,
+      height: 0.15,
       xRotate: 0,
       yRotate: 0,
       zRotate: 0
     });
     
     const pencilPosRef = useRef({
-      height: 0.08,
+      height: 0.15,
       xRotate: 0,
       yRotate: 0,
       zRotate: 0
     });
     
     const pencilTargetPosRef = useRef({
-      height: 0.08,
+      height: 0.15,
       xRotate: 0,
       yRotate: 0,
-      zRotate: 0,
-      heightRotate: 0
-    });
-    
-    // Path state
-    const pencilPathDefaultsRef = useRef({
-      minThickness: 0.2,
-      maxThickness: 2
-    });
-    
-    const pencilPathCurrentRef = useRef({
-      thickness: 0.2
-    });
-    
-    const pencilPathTargetRef = useRef({
-      thickness: 0.2
+      zRotate: 0
     });
 
     useImperativeHandle(ref, () => ({
       clearCanvas: () => {
-        if (drawingCtxRef.current) {
-          drawingCtxRef.current.clearRect(0, 0, drawingCanvasRef.current!.width, drawingCanvasRef.current!.height);
-        }
-      },
-      savePNG: () => {
-        if (drawingCanvasRef.current) {
-          const freshCanvas = document.createElement('canvas');
-          freshCanvas.width = drawingCanvasRef.current.width;
-          freshCanvas.height = drawingCanvasRef.current.height;
-          
-          const freshCtx = freshCanvas.getContext('2d')!;
-          freshCtx.fillStyle = "#f7f4f0";
-          freshCtx.fillRect(0, 0, freshCanvas.width, freshCanvas.height);
-          freshCtx.drawImage(drawingCanvasRef.current, 0, 0);
-          
-          const imageDataURL = freshCanvas.toDataURL();
-          const image = new Image();
-          image.src = imageDataURL;
-          
-          const w = window.open("");
-          w?.document.write(image.outerHTML);
+        if (drawingCtxRef.current && drawingCanvasRef.current) {
+          drawingCtxRef.current.clearRect(0, 0, drawingCanvasRef.current.width, drawingCanvasRef.current.height);
         }
       }
     }));
 
     // Utility functions
-    const rotateAroundWorldAxis = (obj: THREE.Object3D, axis: THREE.Vector3, radians: number) => {
-      const rotWorldMatrix = new THREE.Matrix4();
-      rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
-      rotWorldMatrix.multiply(obj.matrix);
-      obj.matrix = rotWorldMatrix;
-      obj.setRotationFromMatrix(obj.matrix);
-    };
-
     const isNotClose = (current: number, target: number) => {
       return current < target - 0.004 || current > target + 0.004;
     };
@@ -114,8 +69,17 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       return Math.atan2(point2.x - point1.x, point2.y - point1.y);
     };
 
+    const getCanvasSize = () => {
+      return {
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
+    };
+
     useEffect(() => {
       if (!containerRef.current) return;
+
+      const { width, height } = getCanvasSize();
 
       // Initialize Three.js scene
       const scene = new THREE.Scene();
@@ -124,114 +88,63 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       // Initialize renderer
       const renderer = new THREE.WebGLRenderer({
         alpha: true,
-        antialias: true,
-        autoClear: true
+        antialias: true
       });
       renderer.setClearColor(0x000000, 0);
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(width, height);
+      renderer.domElement.style.position = 'absolute';
+      renderer.domElement.style.top = '0';
+      renderer.domElement.style.left = '0';
       renderer.domElement.style.zIndex = '5';
-      renderer.domElement.style.position = 'relative';
       renderer.domElement.style.pointerEvents = 'none';
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       rendererRef.current = renderer;
 
-      // Initialize camera
-      const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 1, 10000);
-      camera.position.set(0, 0, 12);
+      // Initialize camera with responsive aspect ratio
+      const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+      camera.position.set(0, 0, 5);
       cameraRef.current = camera;
 
       // Add lighting
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
-      hemiLight.color.setHSL(0.6, 1, 0.2);
-      hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-      hemiLight.position.set(0, 0, 50);
-      scene.add(hemiLight);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.color.setHSL(1, 1, 1);
-      directionalLight.position.set(-0.5, 1, 10);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(1, 1, 1);
       directionalLight.castShadow = true;
-      directionalLight.shadow.mapSize.width = 2048;
-      directionalLight.shadow.mapSize.height = 2048;
       scene.add(directionalLight);
 
-      const spotLight = new THREE.SpotLight(0xffffff, 0.4);
-      spotLight.color.setHSL(1, 1, 1);
-      spotLight.position.set(-7, 1, 2);
-      scene.add(spotLight);
-
-      const topLight = new THREE.SpotLight(0xffffff, 0.1);
-      topLight.color.setHSL(1, 1, 1);
-      topLight.position.set(1, -7, 2);
-      scene.add(topLight);
-
-      // Add ground
-      const groundGeo = new THREE.PlaneGeometry(10000, 10000);
-      const groundMat = new THREE.ShadowMaterial();
-      groundMat.opacity = 0.1;
-      const ground = new THREE.Mesh(groundGeo, groundMat);
-      ground.position.set(0, 0, 0);
-      ground.receiveShadow = true;
-      scene.add(ground);
-
-      // Load pencil model
-      const loader = new GLTFLoader();
-      loader.load('/src/model/pencil.glb', (gltf) => {
-        const pencilGroup = gltf.scene;
-        
-        pencilGroup.scale.set(0.15, 0.15, 0.15);
-        
-        pencilGroup.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-          }
-        });
-
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(90));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(-15));
-        rotateAroundWorldAxis(pencilGroup, new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(-10));
-
-        pencilDefaultPosRef.current = {
-          height: 0.08,
-          xRotate: pencilGroup.rotation.x,
-          yRotate: pencilGroup.rotation.y,
-          zRotate: pencilGroup.rotation.z
-        };
-
-        pencilRef.current = pencilGroup;
-        scene.add(pencilGroup);
-        animate();
-      }, undefined, (error) => {
-        console.error('Error loading pencil model:', error);
-        createFallbackPencil();
-      });
-
-      const createFallbackPencil = () => {
+      // Create simple pencil geometry
+      const createPencil = () => {
         const pencilGroup = new THREE.Group();
         
-        const bodyGeometry = new THREE.CylinderGeometry(0.03, 0.03, 1.5, 8);
-        const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xff4500 });
+        // Pencil body
+        const bodyGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1, 8);
+        const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xff6b35 });
         const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
         body.castShadow = true;
         
-        const tipGeometry = new THREE.ConeGeometry(0.03, 0.2, 8);
+        // Pencil tip
+        const tipGeometry = new THREE.ConeGeometry(0.02, 0.15, 8);
         const tipMaterial = new THREE.MeshPhongMaterial({ color: 0x8b4513 });
         const tip = new THREE.Mesh(tipGeometry, tipMaterial);
-        tip.position.set(0, 0.85, 0);
+        tip.position.set(0, 0.575, 0);
         tip.castShadow = true;
         
-        const eraserGeometry = new THREE.CylinderGeometry(0.035, 0.035, 0.1, 8);
+        // Eraser
+        const eraserGeometry = new THREE.CylinderGeometry(0.025, 0.025, 0.08, 8);
         const eraserMaterial = new THREE.MeshPhongMaterial({ color: 0xffc0cb });
         const eraser = new THREE.Mesh(eraserGeometry, eraserMaterial);
-        eraser.position.set(0, -0.8, 0);
+        eraser.position.set(0, -0.54, 0);
         eraser.castShadow = true;
         
-        const bandGeometry = new THREE.CylinderGeometry(0.035, 0.035, 0.05, 8);
+        // Metal band
+        const bandGeometry = new THREE.CylinderGeometry(0.025, 0.025, 0.03, 8);
         const bandMaterial = new THREE.MeshPhongMaterial({ color: 0xc0c0c0 });
         const band = new THREE.Mesh(bandGeometry, bandMaterial);
-        band.position.set(0, -0.725, 0);
+        band.position.set(0, -0.485, 0);
         band.castShadow = true;
         
         pencilGroup.add(body);
@@ -239,29 +152,36 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         pencilGroup.add(eraser);
         pencilGroup.add(band);
         
-        pencilGroup.scale.set(0.15, 0.15, 0.15);
+        // Scale and rotate pencil
+        pencilGroup.scale.set(0.3, 0.3, 0.3);
+        pencilGroup.rotation.x = THREE.MathUtils.degToRad(-20);
+        pencilGroup.rotation.y = THREE.MathUtils.degToRad(10);
+        pencilGroup.rotation.z = THREE.MathUtils.degToRad(-5);
         
         pencilDefaultPosRef.current = {
-          height: 0.08,
+          height: 0.15,
           xRotate: pencilGroup.rotation.x,
           yRotate: pencilGroup.rotation.y,
           zRotate: pencilGroup.rotation.z
         };
         
-        pencilRef.current = pencilGroup;
-        scene.add(pencilGroup);
-        animate();
+        return pencilGroup;
       };
+
+      const pencilGroup = createPencil();
+      pencilRef.current = pencilGroup;
+      scene.add(pencilGroup);
 
       // Create drawing canvas
       const drawingCanvas = document.createElement('canvas');
-      drawingCanvas.width = window.innerWidth;
-      drawingCanvas.height = window.innerHeight;
-      drawingCanvas.style.position = 'fixed';
-      drawingCanvas.style.left = '0';
+      drawingCanvas.width = width;
+      drawingCanvas.height = height;
+      drawingCanvas.style.position = 'absolute';
       drawingCanvas.style.top = '0';
+      drawingCanvas.style.left = '0';
       drawingCanvas.style.zIndex = '1';
       drawingCanvas.style.cursor = 'none';
+      drawingCanvas.style.touchAction = 'none';
       
       const drawingCtx = drawingCanvas.getContext('2d')!;
       drawingCanvasRef.current = drawingCanvas;
@@ -271,128 +191,109 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       containerRef.current.appendChild(drawingCanvas);
 
       // Event handlers
-      const handleMouseDown = (e: MouseEvent | TouchEvent) => {
-        if (!gameActive || (e.target as HTMLElement).tagName !== 'CANVAS') return;
+      const getEventPosition = (e: MouseEvent | TouchEvent) => {
+        if ('touches' in e && e.touches.length > 0) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+      };
+
+      const handleStart = (e: MouseEvent | TouchEvent) => {
+        if (!gameActive) return;
+        e.preventDefault();
         
         isDrawingRef.current = true;
         onDrawingStart?.();
         
-        pencilTargetPosRef.current.height = 0.02;
-        pencilTargetPosRef.current.heightRotate = 0.2;
-        pencilPathTargetRef.current.thickness = pencilPathDefaultsRef.current.maxThickness;
+        pencilTargetPosRef.current.height = 0.05;
         
-        const xPos = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const yPos = 'touches' in e ? e.touches[0].clientY : e.clientY;
-        
-        const pencilTipOffset = { x: 45, y: -25 };
-        const currentPoint = { x: xPos + pencilTipOffset.x, y: yPos + pencilTipOffset.y };
+        const pos = getEventPosition(e);
+        const currentPoint = { x: pos.x, y: pos.y };
         
         drawingCtx.beginPath();
-        drawingCtx.fillStyle = '#100c08';
-        drawingCtx.globalAlpha = 0.9;
-        drawingCtx.arc(
-          currentPoint.x, currentPoint.y, pencilPathDefaultsRef.current.thickness,
-          0, Math.PI * 2, false
-        );
+        drawingCtx.fillStyle = '#2d2d2d';
+        drawingCtx.globalAlpha = 0.8;
+        drawingCtx.arc(currentPoint.x, currentPoint.y, 3, 0, Math.PI * 2, false);
         drawingCtx.fill();
         
         lastPointRef.current = currentPoint;
       };
 
-      const handleMouseUp = () => {
+      const handleEnd = (e: MouseEvent | TouchEvent) => {
         if (!gameActive) return;
+        e.preventDefault();
         
-        newlyUpRef.current = true;
         isDrawingRef.current = false;
         onDrawingEnd?.();
         
-        pencilTargetPosRef.current.height = 0.08;
-        pencilTargetPosRef.current.heightRotate = 0;
-        pencilPathTargetRef.current.thickness = pencilPathDefaultsRef.current.minThickness;
-        
-        setTimeout(() => {
-          newlyUpRef.current = false;
-        }, 50);
+        pencilTargetPosRef.current.height = 0.15;
       };
 
-      const handleMouseMove = (e: MouseEvent | TouchEvent) => {
+      const handleMove = (e: MouseEvent | TouchEvent) => {
         if (!gameActive) return;
-        
         e.preventDefault();
         
-        const xPos = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const yPos = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const pos = getEventPosition(e);
         
-        mouseRef.current.x = (xPos / window.innerWidth) * 2 - 1;
-        mouseRef.current.y = -(yPos / window.innerHeight) * 2 + 1;
+        // Update mouse position for 3D
+        mouseRef.current.x = (pos.x / width) * 2 - 1;
+        mouseRef.current.y = -(pos.y / height) * 2 + 1;
         
-        const pencilTipOffset = { x: 45, y: -25 };
-        
-        if (!lastPointRef.current) {
-          lastPointRef.current = { x: xPos + pencilTipOffset.x, y: yPos + pencilTipOffset.y };
-        }
-        
-        const positionOffset = { x: 0, y: 0 };
-          
-        const vector = new THREE.Vector3(
-          mouseRef.current.x + positionOffset.x, 
-          mouseRef.current.y + positionOffset.y, 
-          0.5
-        );
+        // Update 3D mouse position
+        const vector = new THREE.Vector3(mouseRef.current.x, mouseRef.current.y, 0.5);
         vector.unproject(camera);
-        
         const dir = vector.sub(camera.position).normalize();
         const distance = -camera.position.z / dir.z;
         mousePosRef.current = camera.position.clone().add(dir.multiplyScalar(distance));
         
-        const currentPoint = { x: xPos + pencilTipOffset.x, y: yPos + pencilTipOffset.y };
-        const lastPoint = lastPointRef.current;
-        
-        const xDist = Math.abs(lastPoint.x - currentPoint.x);
-        const yDist = Math.abs(lastPoint.y - currentPoint.y);
-        
-        mouseDirectionRef.current.x = currentPoint.x > lastPoint.x ? 1 : -1;
-        mouseDirectionRef.current.y = currentPoint.y > lastPoint.y ? -1 : 1;
-        
-        const newXAngle = yDist / 100;
-        const newZAngle = (xDist / 100) * -1;
-        const maxAngle = 0.25;
-        
-        pencilTargetPosRef.current.xRotate = Math.max(-maxAngle, Math.min(maxAngle, newXAngle));
-        pencilTargetPosRef.current.zRotate = Math.max(-maxAngle, Math.min(maxAngle, newZAngle));
-        
-        if (isDrawingRef.current || newlyUpRef.current) {
+        // Drawing logic
+        if (isDrawingRef.current && lastPointRef.current) {
+          const currentPoint = { x: pos.x, y: pos.y };
+          const lastPoint = lastPointRef.current;
+          
           const dist = distanceBetween(currentPoint, lastPoint);
           const angle = angleBetween(lastPoint, currentPoint);
           
-          for (let i = 0; i < dist; i += 0.3) {
+          for (let i = 0; i < dist; i += 1) {
             const x = lastPoint.x + Math.sin(angle) * i;
             const y = lastPoint.y + Math.cos(angle) * i;
             
             drawingCtx.beginPath();
-            drawingCtx.fillStyle = '#100c08';
-            drawingCtx.globalAlpha = 0.15 + Math.random() * 0.1;
-            drawingCtx.arc(
-              x, y, pencilPathCurrentRef.current.thickness,
-              0, Math.PI * 2, false
-            );
+            drawingCtx.fillStyle = '#2d2d2d';
+            drawingCtx.globalAlpha = 0.3 + Math.random() * 0.2;
+            drawingCtx.arc(x, y, 2 + Math.random(), 0, Math.PI * 2, false);
             drawingCtx.fill();
           }
+          
+          lastPointRef.current = currentPoint;
         }
-        
-        lastPointRef.current = currentPoint;
       };
 
       const handleResize = () => {
+        const { width: newWidth, height: newHeight } = getCanvasSize();
+        
         if (camera && renderer) {
-          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.aspect = newWidth / newHeight;
           camera.updateProjectionMatrix();
-          renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.setSize(newWidth, newHeight);
+        }
+        
+        if (drawingCanvas) {
+          // Save current drawing
+          const imageData = drawingCtx.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
           
-          if (drawingCanvas) {
-            drawingCanvas.width = window.innerWidth;
-            drawingCanvas.height = window.innerHeight;
-          }
+          // Resize canvas
+          drawingCanvas.width = newWidth;
+          drawingCanvas.height = newHeight;
+          
+          // Restore drawing (scaled)
+          const tempCanvas = document.createElement('canvas');
+          const tempCtx = tempCanvas.getContext('2d')!;
+          tempCanvas.width = imageData.width;
+          tempCanvas.height = imageData.height;
+          tempCtx.putImageData(imageData, 0, 0);
+          
+          drawingCtx.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
         }
       };
 
@@ -400,31 +301,26 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
       const animate = () => {
         if (!pencilRef.current) return;
         
-        pencilPosRef.current.height += (pencilTargetPosRef.current.height - pencilPosRef.current.height) * 0.2;
+        // Smooth height transition
+        pencilPosRef.current.height += (pencilTargetPosRef.current.height - pencilPosRef.current.height) * 0.1;
         
+        // Update pencil position
         pencilRef.current.position.copy(mousePosRef.current);
-        pencilRef.current.position.x -= 0.1;
-        pencilRef.current.position.y += 0.1;
         pencilRef.current.position.z += pencilPosRef.current.height;
         
-        pencilPathCurrentRef.current.thickness += (pencilPathTargetRef.current.thickness - pencilPathCurrentRef.current.thickness) * 0.2;
-        
+        // Smooth rotation updates
         if (isNotClose(pencilPosRef.current.xRotate, pencilTargetPosRef.current.xRotate)) {
-          const newRotate = (pencilTargetPosRef.current.xRotate - pencilPosRef.current.xRotate) * 0.2;
-          pencilPosRef.current.xRotate += Math.round(newRotate * 1000) / 1000;
+          pencilPosRef.current.xRotate += (pencilTargetPosRef.current.xRotate - pencilPosRef.current.xRotate) * 0.1;
           pencilRef.current.rotation.x = pencilPosRef.current.xRotate + pencilDefaultPosRef.current.xRotate;
         }
         
         if (isNotClose(pencilPosRef.current.yRotate, pencilTargetPosRef.current.yRotate)) {
-          const newRotate = (pencilTargetPosRef.current.yRotate - pencilPosRef.current.yRotate) * 0.2;
-          pencilPosRef.current.yRotate += Math.round(newRotate * 1000) / 1000;
+          pencilPosRef.current.yRotate += (pencilTargetPosRef.current.yRotate - pencilPosRef.current.yRotate) * 0.1;
           pencilRef.current.rotation.y = pencilPosRef.current.yRotate + pencilDefaultPosRef.current.yRotate;
         }
         
-        const targetZAngle = pencilTargetPosRef.current.zRotate + pencilTargetPosRef.current.heightRotate;
-        if (isNotClose(pencilPosRef.current.zRotate, targetZAngle)) {
-          const newRotate = (targetZAngle - pencilPosRef.current.zRotate) * 0.2;
-          pencilPosRef.current.zRotate += Math.round(newRotate * 1000) / 1000;
+        if (isNotClose(pencilPosRef.current.zRotate, pencilTargetPosRef.current.zRotate)) {
+          pencilPosRef.current.zRotate += (pencilTargetPosRef.current.zRotate - pencilPosRef.current.zRotate) * 0.1;
           pencilRef.current.rotation.z = pencilPosRef.current.zRotate + pencilDefaultPosRef.current.zRotate;
         }
         
@@ -432,26 +328,28 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         animationRef.current = requestAnimationFrame(animate);
       };
 
-      // Add event listeners
-      document.addEventListener('mousedown', handleMouseDown);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('touchstart', handleMouseDown);
-      document.addEventListener('touchend', handleMouseUp);
-      document.addEventListener('touchmove', handleMouseMove);
+      // Add event listeners for both mouse and touch
+      drawingCanvas.addEventListener('mousedown', handleStart);
+      drawingCanvas.addEventListener('mouseup', handleEnd);
+      drawingCanvas.addEventListener('mousemove', handleMove);
+      drawingCanvas.addEventListener('touchstart', handleStart, { passive: false });
+      drawingCanvas.addEventListener('touchend', handleEnd, { passive: false });
+      drawingCanvas.addEventListener('touchmove', handleMove, { passive: false });
       window.addEventListener('resize', handleResize);
+
+      animate();
 
       return () => {
         if (animationRef.current) {
           cancelAnimationFrame(animationRef.current);
         }
         
-        document.removeEventListener('mousedown', handleMouseDown);
-        document.removeEventListener('mouseup', handleMouseUp);
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('touchstart', handleMouseDown);
-        document.removeEventListener('touchend', handleMouseUp);
-        document.removeEventListener('touchmove', handleMouseMove);
+        drawingCanvas.removeEventListener('mousedown', handleStart);
+        drawingCanvas.removeEventListener('mouseup', handleEnd);
+        drawingCanvas.removeEventListener('mousemove', handleMove);
+        drawingCanvas.removeEventListener('touchstart', handleStart);
+        drawingCanvas.removeEventListener('touchend', handleEnd);
+        drawingCanvas.removeEventListener('touchmove', handleMove);
         window.removeEventListener('resize', handleResize);
         
         if (containerRef.current) {
