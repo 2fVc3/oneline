@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, BookOpen, Settings, Trophy, Sparkles } from 'lucide-react';
+import { Play, BookOpen, Settings, Trophy } from 'lucide-react';
 
 interface MainMenuProps {
   onStartGame: () => void;
@@ -16,41 +16,38 @@ export const MainMenu: React.FC<MainMenuProps> = ({
 }) => {
   return (
     <div className="main-menu">
-      {/* Animated Background */}
-      <div className="animated-bg">
-        <div className="floating-shape shape-1"></div>
-        <div className="floating-shape shape-2"></div>
-        <div className="floating-shape shape-3"></div>
-        <div className="floating-shape shape-4"></div>
-      </div>
-
-      <div className="menu-container bounce-in">
+      <div className="menu-container">
         <div className="game-title">
           <h1 className="title-text">One Line</h1>
-          <p className="subtitle-text">✨ Draw it in one magical stroke! ✨</p>
+          <p className="subtitle-text">Draw it in one continuous line!</p>
         </div>
         
-        <div className="level-display slide-in-up">
+        <div className="level-display">
           <Trophy className="trophy-icon" />
           <span className="level-text">Level {currentLevel}</span>
-          <Sparkles className="trophy-icon" style={{ color: '#ff6b6b' }} />
         </div>
         
         <div className="menu-buttons">
-          <button className="modern-button primary" onClick={onStartGame}>
+          <button className="sketch-button primary" onClick={onStartGame}>
             <Play className="button-icon" />
-            Start Adventure
+            Start Game
           </button>
           
-          <button className="modern-button secondary" onClick={onInstructions}>
+          <button className="sketch-button secondary" onClick={onInstructions}>
             <BookOpen className="button-icon" />
             How to Play
           </button>
           
-          <button className="modern-button accent" onClick={onSettings}>
+          <button className="sketch-button secondary" onClick={onSettings}>
             <Settings className="button-icon" />
             Settings
           </button>
+        </div>
+        
+        <div className="menu-decoration">
+          <div className="sketch-line line-1"></div>
+          <div className="sketch-line line-2"></div>
+          <div className="sketch-line line-3"></div>
         </div>
       </div>
     </div>
