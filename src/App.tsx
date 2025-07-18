@@ -27,12 +27,7 @@ function App() {
   };
 
   const handleGameComplete = (result: GameResult) => {
-    console.log('App received game result:', {
-      word: result.word,
-      completed: result.completed,
-      level: result.level,
-      hasImage: !!result.drawingImage
-    }); // Debug log
+    console.log('App received game result:', result); // Debug log
     setGameResult(result);
     if (result.completed) {
       setCurrentLevel(prev => prev + 1);

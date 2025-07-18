@@ -74,7 +74,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const handleDrawingEnd = (imageData: string) => {
     setIsDrawing(false);
     setCapturedImage(imageData);
-    console.log('Drawing ended, current word:', currentWord); // Debug log
     // Auto-submit when drawing ends with polaroid image
     setTimeout(() => {
       handleSubmitDrawing(imageData);
@@ -83,7 +82,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
   const handleSubmitDrawing = (imageData: string) => {
     setGameActive(false);
-    console.log('Submitting drawing for word:', currentWord, 'Image data length:', imageData.length); // Debug log
+    console.log('Submitting drawing for word:', currentWord); // Debug log
     onGameComplete({
       word: currentWord,
       completed: true,
@@ -102,11 +101,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       clearInterval(timerRef.current);
     }
   };
-
-  // Debug: Log current word whenever it changes
-  useEffect(() => {
-    console.log('GameScreen currentWord updated:', currentWord);
-  }, [currentWord]);
 
   return (
     <div className="game-screen">
