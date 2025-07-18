@@ -14,6 +14,7 @@ export interface GameResult {
   completed: boolean;
   timeLeft: number;
   level: number;
+  drawingImage?: string;
 }
 
 function App() {

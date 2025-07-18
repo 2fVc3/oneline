@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { PencilDrawing } from './PencilDrawing';
 import { Timer } from './Timer';
 import { GameUI } from './GameUI';
-import { GameControls } from './GameControls';
 import { getWordForLevel } from '../utils/wordLists';
 import { GameResult } from '../App';
 
@@ -22,7 +21,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasStartedDrawing, setHasStartedDrawing] = useState(false);
   const [gameActive, setGameActive] = useState(true);
-  const [showSubmitButton, setShowSubmitButton] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string>('');
   const drawingRef = useRef<any>(null);
   const timerRef = useRef<NodeJS.Timeout>();
 
@@ -70,27 +69,28 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     }
   };
 
-  const handleDrawingEnd = () => {
+  const handleDrawingEnd = (imageData: string) => {
     setIsDrawing(false);
-    // Auto-submit when drawing ends (left mouse button release)
-    handleSubmitDrawing();
+    setCapturedImage(imageData);
+    // Auto-submit when drawing ends with polaroid image
+    handleSubmitDrawing(imageData);
   };
 
-  const handleSubmitDrawing = () => {
+  const handleSubmitDrawing = (imageData?: string) => {
     setGameActive(false);
-    setShowSubmitButton(false);
     onGameComplete({
       word: currentWord,
       completed: true,
       timeLeft,
-      level
+      level,
+      drawingImage: imageData || capturedImage
     });
   };
 
   const handleClear = () => {
     drawingRef.current?.clearCanvas();
     setHasStartedDrawing(false);
-    setShowSubmitButton(false);
+    setCapturedImage('');
     setTimeLeft(60);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -110,13 +110,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       
       <Timer timeLeft={timeLeft} isActive={hasStartedDrawing && gameActive} />
       
-      {showSubmitButton && (
-        <GameControls 
-          onSubmit={handleSubmitDrawing}
-          onClear={handleClear}
-        />
-      )}
-      
       <PencilDrawing 
         ref={drawingRef}
         onDrawingStart={handleDrawingStart}
@@ -127,12 +120,10 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       <div className="game-instructions">
         <p className="instruction-text">
           {!hasStartedDrawing 
-            ? "Click and hold to start drawing!"
+           ? "Click and hold to start drawing with your cursor!"
             : isDrawing 
               ? "Keep drawing..."
-              : showSubmitButton
-                ? "Release to pause. Submit when ready!"
-                : "Drawing submitted!"
+             : "Release to capture your drawing!"
           }
         </p>
       </div>

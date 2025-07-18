@@ -2,15 +2,15 @@ import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react
 
 interface PencilDrawingProps {
   onDrawingStart?: () => void;
-  onDrawingEnd?: () => void;
+  onDrawingEnd?: (imageData: string) => void;
   gameActive?: boolean;
 }
 
 export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
   ({ onDrawingStart, onDrawingEnd, gameActive = true }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const drawingCanvasRef = useRef<HTMLCanvasElement>();
-    const drawingCtxRef = useRef<CanvasRenderingContext2D>();
+    const canvasRef = useRef<HTMLCanvasElement>();
+    const ctxRef = useRef<CanvasRenderingContext2D>();
     const initializedRef = useRef(false);
     
     // Drawing state
@@ -19,59 +19,63 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
 
     useImperativeHandle(ref, () => ({
       clearCanvas: () => {
-        if (drawingCtxRef.current && drawingCanvasRef.current) {
-          drawingCtxRef.current.clearRect(0, 0, drawingCanvasRef.current.width, drawingCanvasRef.current.height);
+        if (ctxRef.current && canvasRef.current) {
+          ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
         }
+      },
+      captureDrawing: () => {
+        if (canvasRef.current) {
+          return canvasRef.current.toDataURL('image/png');
+        }
+        return '';
       }
     }));
 
-    // Utility functions
-    const distanceBetween = (point1: {x: number, y: number}, point2: {x: number, y: number}) => {
-      return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
-    };
-
-    const angleBetween = (point1: {x: number, y: number}, point2: {x: number, y: number}) => {
-      return Math.atan2(point2.x - point1.x, point2.y - point1.y);
-    };
-
-    const getCanvasSize = () => {
-      return {
-        width: window.innerWidth,
-        height: window.innerHeight
-      };
-    };
-
-    // Initialize once and never recreate
+    // Initialize canvas once
     useEffect(() => {
       if (!containerRef.current || initializedRef.current) return;
       
       initializedRef.current = true;
-      const { width, height } = getCanvasSize();
+      const { width, height } = {
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
 
-      // Create drawing canvas - ONLY ONCE
-      const drawingCanvas = document.createElement('canvas');
-      drawingCanvas.width = width;
-      drawingCanvas.height = height;
-      drawingCanvas.style.position = 'absolute';
-      drawingCanvas.style.top = '0';
-      drawingCanvas.style.left = '0';
-      drawingCanvas.style.zIndex = '1';
-      drawingCanvas.style.cursor = 'crosshair';
-      drawingCanvas.style.touchAction = 'none';
-      drawingCanvas.style.background = 'transparent';
+      // Create drawing canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.position = 'absolute';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.zIndex = '1';
+      canvas.style.cursor = 'crosshair';
+      canvas.style.touchAction = 'none';
+      canvas.style.background = 'transparent';
       
-      const drawingCtx = drawingCanvas.getContext('2d')!;
-      drawingCanvasRef.current = drawingCanvas;
-      drawingCtxRef.current = drawingCtx;
-
-      containerRef.current.appendChild(drawingCanvas);
+      const ctx = canvas.getContext('2d')!;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#2d2d2d';
+      ctx.lineWidth = 3;
+      
+      canvasRef.current = canvas;
+      ctxRef.current = ctx;
+      containerRef.current.appendChild(canvas);
 
       // Event handlers
       const getEventPosition = (e: MouseEvent | TouchEvent) => {
+        const rect = canvas.getBoundingClientRect();
         if ('touches' in e && e.touches.length > 0) {
-          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          return { 
+            x: e.touches[0].clientX - rect.left, 
+            y: e.touches[0].clientY - rect.top 
+          };
         }
-        return { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+        return { 
+          x: (e as MouseEvent).clientX - rect.left, 
+          y: (e as MouseEvent).clientY - rect.top 
+        };
       };
 
       const handleStart = (e: MouseEvent | TouchEvent) => {
@@ -85,17 +89,12 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         onDrawingStart?.();
         
         const pos = getEventPosition(e);
-        const currentPoint = { x: pos.x, y: pos.y };
+        lastPointRef.current = pos;
         
-        if (drawingCtxRef.current) {
-          drawingCtxRef.current.beginPath();
-          drawingCtxRef.current.fillStyle = '#2d2d2d';
-          drawingCtxRef.current.globalAlpha = 0.8;
-          drawingCtxRef.current.arc(currentPoint.x, currentPoint.y, 3, 0, Math.PI * 2, false);
-          drawingCtxRef.current.fill();
+        if (ctxRef.current) {
+          ctxRef.current.beginPath();
+          ctxRef.current.moveTo(pos.x, pos.y);
         }
-        
-        lastPointRef.current = currentPoint;
       };
 
       const handleEnd = (e: MouseEvent | TouchEvent) => {
@@ -108,53 +107,46 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
         if (isDrawingRef.current) {
           isDrawingRef.current = false;
           
-          // Auto-submit drawing when left mouse button is released
+          // Capture the drawing as polaroid
+          const imageData = canvas.toDataURL('image/png');
+          
+          // Call onDrawingEnd with the captured image
           setTimeout(() => {
-            onDrawingEnd?.();
-          }, 100); // Small delay to ensure drawing is complete
+            onDrawingEnd?.(imageData);
+          }, 100);
         }
       };
 
       const handleMove = (e: MouseEvent | TouchEvent) => {
-        if (!gameActive) return;
+        if (!gameActive || !isDrawingRef.current) return;
         e.preventDefault();
         
         const pos = getEventPosition(e);
         
-        // Drawing logic - only when left mouse button is pressed
-        if (isDrawingRef.current && lastPointRef.current && drawingCtxRef.current) {
-          const currentPoint = { x: pos.x, y: pos.y };
-          const lastPoint = lastPointRef.current;
-          
-          const dist = distanceBetween(currentPoint, lastPoint);
-          const angle = angleBetween(lastPoint, currentPoint);
-          
-          // Draw smooth line between points
-          for (let i = 0; i < dist; i += 1) {
-            const x = lastPoint.x + Math.sin(angle) * i;
-            const y = lastPoint.y + Math.cos(angle) * i;
-            
-            drawingCtxRef.current.beginPath();
-            drawingCtxRef.current.fillStyle = '#2d2d2d';
-            drawingCtxRef.current.globalAlpha = 0.4 + Math.random() * 0.3;
-            drawingCtxRef.current.arc(x, y, 2 + Math.random(), 0, Math.PI * 2, false);
-            drawingCtxRef.current.fill();
-          }
-          
-          lastPointRef.current = currentPoint;
+        if (lastPointRef.current && ctxRef.current) {
+          ctxRef.current.lineTo(pos.x, pos.y);
+          ctxRef.current.stroke();
+          lastPointRef.current = pos;
         }
       };
 
       const handleResize = () => {
-        const { width: newWidth, height: newHeight } = getCanvasSize();
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
         
-        if (drawingCanvasRef.current && drawingCtxRef.current) {
+        if (canvasRef.current && ctxRef.current) {
           // Save current drawing
-          const imageData = drawingCtxRef.current.getImageData(0, 0, drawingCanvasRef.current.width, drawingCanvasRef.current.height);
+          const imageData = ctxRef.current.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
           
           // Resize canvas
-          drawingCanvasRef.current.width = newWidth;
-          drawingCanvasRef.current.height = newHeight;
+          canvasRef.current.width = newWidth;
+          canvasRef.current.height = newHeight;
+          
+          // Restore drawing context settings
+          ctxRef.current.lineCap = 'round';
+          ctxRef.current.lineJoin = 'round';
+          ctxRef.current.strokeStyle = '#2d2d2d';
+          ctxRef.current.lineWidth = 3;
           
           // Restore drawing (scaled)
           const tempCanvas = document.createElement('canvas');
@@ -163,44 +155,43 @@ export const PencilDrawing = forwardRef<any, PencilDrawingProps>(
           tempCanvas.height = imageData.height;
           tempCtx.putImageData(imageData, 0, 0);
           
-          drawingCtxRef.current.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
+          ctxRef.current.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
         }
       };
 
       // Add event listeners
-      drawingCanvas.addEventListener('mousedown', handleStart);
-      drawingCanvas.addEventListener('mouseup', handleEnd);
-      drawingCanvas.addEventListener('mousemove', handleMove);
-      drawingCanvas.addEventListener('touchstart', handleStart, { passive: false });
-      drawingCanvas.addEventListener('touchend', handleEnd, { passive: false });
-      drawingCanvas.addEventListener('touchmove', handleMove, { passive: false });
+      canvas.addEventListener('mousedown', handleStart);
+      canvas.addEventListener('mouseup', handleEnd);
+      canvas.addEventListener('mousemove', handleMove);
+      canvas.addEventListener('touchstart', handleStart, { passive: false });
+      canvas.addEventListener('touchend', handleEnd, { passive: false });
+      canvas.addEventListener('touchmove', handleMove, { passive: false });
       
       // Prevent context menu on right click
-      drawingCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
+      canvas.addEventListener('contextmenu', (e) => e.preventDefault());
       
       window.addEventListener('resize', handleResize);
 
       return () => {
         // Clean up event listeners
-        if (drawingCanvasRef.current) {
-          drawingCanvasRef.current.removeEventListener('mousedown', handleStart);
-          drawingCanvasRef.current.removeEventListener('mouseup', handleEnd);
-          drawingCanvasRef.current.removeEventListener('mousemove', handleMove);
-          drawingCanvasRef.current.removeEventListener('touchstart', handleStart);
-          drawingCanvasRef.current.removeEventListener('touchend', handleEnd);
-          drawingCanvasRef.current.removeEventListener('touchmove', handleMove);
-          drawingCanvasRef.current.removeEventListener('contextmenu', (e) => e.preventDefault());
+        if (canvasRef.current) {
+          canvasRef.current.removeEventListener('mousedown', handleStart);
+          canvasRef.current.removeEventListener('mouseup', handleEnd);
+          canvasRef.current.removeEventListener('mousemove', handleMove);
+          canvasRef.current.removeEventListener('touchstart', handleStart);
+          canvasRef.current.removeEventListener('touchend', handleEnd);
+          canvasRef.current.removeEventListener('touchmove', handleMove);
+          canvasRef.current.removeEventListener('contextmenu', (e) => e.preventDefault());
         }
         window.removeEventListener('resize', handleResize);
         
-        // Only clear container on unmount
         if (containerRef.current) {
           containerRef.current.innerHTML = '';
         }
         
         initializedRef.current = false;
       };
-    }, []); // Empty dependency array - only run once!
+    }, []);
 
     return <div ref={containerRef} className="pencil-drawing-container" />;
   }

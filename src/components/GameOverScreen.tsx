@@ -35,6 +35,15 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
           </p>
         </div>
         
+        {result.drawingImage && (
+          <div className="polaroid-container">
+            <div className="polaroid">
+              <img src={result.drawingImage} alt="Your drawing" className="polaroid-image" />
+              <div className="polaroid-caption">"{result.word}"</div>
+            </div>
+          </div>
+        )}
+        
         <div className="result-details">
           <div className="result-card">
             <h3 className="result-word">"{result.word}"</h3>
