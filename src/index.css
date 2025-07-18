@@ -814,15 +814,15 @@ button {
 .game-over-screen {
   width: 100%;
   height: 100%;
-  min-height: 100vh;
-  max-height: 100vh;
+  min-height: 100dvh;
+  max-height: 100dvh;
   background: linear-gradient(135deg, #f7f4f0 0%, #ede7d9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: clamp(0.5rem, 2vw, 1rem);
+  padding: clamp(0.25rem, 1vw, 0.5rem);
   box-sizing: border-box;
 }
 
@@ -830,28 +830,30 @@ button {
   text-align: center;
   z-index: 10;
   position: relative;
-  max-width: min(400px, 95vw);
-  padding: clamp(0.75rem, 2vw, 1rem);
+  max-width: min(380px, 95vw);
+  padding: clamp(0.5rem, 1.5vw, 0.75rem);
   width: 100%;
-  max-height: 90vh;
+  max-height: 95dvh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: clamp(0.5rem, 2vw, 0.75rem);
 }
 
 .result-header {
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .result-icon {
-  width: clamp(2.5rem, 6vw, 3rem);
-  height: clamp(2.5rem, 6vw, 3rem);
+  width: clamp(2rem, 5vw, 2.5rem);
+  height: clamp(2rem, 5vw, 2.5rem);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto clamp(0.5rem, 1.5vw, 0.75rem);
+  margin: 0 auto clamp(0.25rem, 1vw, 0.5rem);
   border: 3px solid #2d2d2d;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
   transform: rotate(-5deg);
@@ -869,53 +871,54 @@ button {
 
 .result-title {
   font-family: 'Caveat', cursive;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(1.2rem, 4vw, 2rem);
   font-weight: 700;
   color: #2d2d2d;
-  margin: 0 0 clamp(0.25rem, 1vw, 0.5rem) 0;
+  margin: 0;
   transform: rotate(1deg);
 }
 
 .result-subtitle {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
   color: #666;
   margin: 0;
   transform: rotate(-0.5deg);
 }
 
 .result-details {
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .result-card {
   background: rgba(255, 255, 255, 0.95);
   border: 3px solid #2d2d2d;
   border-radius: 20px;
-  padding: clamp(0.75rem, 2vw, 1rem);
+  padding: clamp(0.5rem, 1.5vw, 0.75rem);
   transform: rotate(-1deg);
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 .result-word {
   font-family: 'Caveat', cursive;
-  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+  font-size: clamp(1rem, 3vw, 1.4rem);
   font-weight: 600;
   color: #2d2d2d;
-  margin: 0 0 clamp(0.5rem, 1.5vw, 0.75rem) 0;
+  margin: 0 0 clamp(0.25rem, 1vw, 0.5rem) 0;
   word-break: break-word;
 }
 
 .result-stats {
   display: grid;
-  gap: clamp(0.2rem, 0.8vw, 0.3rem);
+  gap: clamp(0.1rem, 0.5vw, 0.2rem);
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(0.3rem, 1vw, 0.4rem) 0;
+  padding: clamp(0.2rem, 0.8vw, 0.3rem) 0;
   border-bottom: 1px solid rgba(45, 45, 45, 0.1);
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -923,13 +926,13 @@ button {
 
 .stat-label {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
   color: #666;
 }
 
 .stat-value {
   font-family: 'Kalam', cursive;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
   color: #2d2d2d;
   font-weight: 600;
 }
@@ -945,9 +948,10 @@ button {
 .result-actions {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.5rem, 1.5vw, 0.75rem);
+  gap: clamp(0.4rem, 1.2vw, 0.6rem);
   align-items: center;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .result-decoration {
@@ -962,7 +966,7 @@ button {
 
 .sketch-star {
   position: absolute;
-  font-size: 2rem;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
   color: rgba(255, 215, 0, 0.3);
   animation: twinkle 2s infinite;
 }
@@ -994,18 +998,20 @@ button {
 .polaroid-container {
   display: flex;
   justify-content: center;
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .polaroid {
   background: white;
-  padding: clamp(0.5rem, 2vw, 0.75rem);
-  padding-bottom: clamp(2rem, 5vw, 3rem);
+  padding: clamp(0.4rem, 1.5vw, 0.6rem);
+  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.1);
   transform: rotate(-2deg);
   transition: transform 0.3s ease;
-  max-width: min(300px, 80vw);
+  max-width: min(250px, 75vw);
+  width: 100%;
 }
 
 .polaroid:hover {
@@ -1015,20 +1021,22 @@ button {
 .polaroid-image {
   width: 100%;
   height: auto;
-  max-height: clamp(150px, 30vw, 200px);
+  max-height: clamp(120px, 25vw, 160px);
   object-fit: contain;
   border-radius: 4px;
   background: #f8f8f8;
   border: 1px solid #ddd;
+  aspect-ratio: 1;
 }
 
 .polaroid-caption {
   text-align: center;
-  margin-top: clamp(0.5rem, 2vw, 0.75rem);
+  margin-top: clamp(0.4rem, 1.5vw, 0.6rem);
   font-family: 'Caveat', cursive;
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
   color: #2d2d2d;
   font-weight: 600;
+  word-break: break-word;
 }
 
 /* Drawing Container */
@@ -1405,6 +1413,48 @@ button {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .game-over-container {
+    max-width: 95vw;
+    padding: clamp(0.4rem, 1.2vw, 0.6rem);
+    gap: clamp(0.4rem, 1.5vw, 0.6rem);
+  }
+  
+  .result-icon {
+    width: clamp(1.8rem, 4.5vw, 2.2rem);
+    height: clamp(1.8rem, 4.5vw, 2.2rem);
+  }
+  
+  .result-title {
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+  }
+  
+  .result-subtitle {
+    font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+  }
+  
+  .result-word {
+    font-size: clamp(0.9rem, 2.8vw, 1.2rem);
+  }
+  
+  .polaroid {
+    max-width: min(220px, 85vw);
+    padding: clamp(0.3rem, 1.2vw, 0.5rem);
+    padding-bottom: clamp(1.2rem, 3.5vw, 2rem);
+  }
+  
+  .polaroid-image {
+    max-height: clamp(100px, 22vw, 140px);
+  }
+  
+  .polaroid-caption {
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    margin-top: clamp(0.3rem, 1.2vw, 0.5rem);
+  }
+  
+  .sketch-star {
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+  }
+  
   .menu-row {
     flex-direction: column;
     align-items: center;
@@ -1457,6 +1507,77 @@ button {
 }
 
 @media (max-width: 480px) {
+  .game-over-screen {
+    padding: clamp(0.2rem, 0.8vw, 0.4rem);
+  }
+  
+  .game-over-container {
+    max-width: 98vw;
+    padding: clamp(0.3rem, 1vw, 0.5rem);
+    gap: clamp(0.3rem, 1.2vw, 0.5rem);
+    max-height: 98dvh;
+  }
+  
+  .result-icon {
+    width: clamp(1.6rem, 4vw, 2rem);
+    height: clamp(1.6rem, 4vw, 2rem);
+    margin-bottom: clamp(0.2rem, 0.8vw, 0.4rem);
+  }
+  
+  .result-title {
+    font-size: clamp(1rem, 3.2vw, 1.4rem);
+  }
+  
+  .result-subtitle {
+    font-size: clamp(0.6rem, 1.6vw, 0.75rem);
+  }
+  
+  .result-card {
+    padding: clamp(0.4rem, 1.2vw, 0.6rem);
+  }
+  
+  .result-word {
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    margin-bottom: clamp(0.2rem, 0.8vw, 0.4rem);
+  }
+  
+  .stat-item {
+    padding: clamp(0.15rem, 0.6vw, 0.25rem) 0;
+  }
+  
+  .stat-label,
+  .stat-value {
+    font-size: clamp(0.65rem, 1.6vw, 0.75rem);
+  }
+  
+  .polaroid {
+    max-width: min(200px, 90vw);
+    padding: clamp(0.25rem, 1vw, 0.4rem);
+    padding-bottom: clamp(1rem, 3vw, 1.8rem);
+  }
+  
+  .polaroid-image {
+    max-height: clamp(80px, 20vw, 120px);
+  }
+  
+  .polaroid-caption {
+    font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+    margin-top: clamp(0.25rem, 1vw, 0.4rem);
+  }
+  
+  .result-actions {
+    gap: clamp(0.3rem, 1vw, 0.5rem);
+  }
+  
+  .sketch-button.large {
+    padding: clamp(0.6rem, 2vw, 0.8rem) clamp(1.2rem, 3vw, 1.6rem);
+    font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  }
+  
+  .sketch-star {
+    font-size: clamp(0.8rem, 2vw, 1.2rem);
+  }
+  
   .menu-container {
     padding: clamp(0.5rem, 3vw, 1rem);
   }
