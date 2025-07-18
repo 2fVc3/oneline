@@ -18,8 +18,17 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
   const isSuccess = result.completed && result.timeLeft > 0;
   
   // Debug log to check if word is being received
-  console.log('GameOverScreen received result:', result);
-  console.log('Word from result:', result.word);
+  console.log('GameOverScreen received result:', {
+    word: result.word,
+    wordLength: result.word?.length || 0,
+    completed: result.completed,
+    level: result.level,
+    hasImage: !!result.drawingImage
+  });
+  
+  // Ensure we have a valid word
+  const displayWord = result.word && result.word.trim() !== '' ? result.word : 'Unknown';
+  console.log('Display word will be:', displayWord);
   
   return (
     <div className="game-over-screen">
@@ -43,14 +52,14 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
           <div className="polaroid-container">
             <div className="polaroid">
               <img src={result.drawingImage} alt="Your drawing" className="polaroid-image" />
-              <div className="polaroid-caption">"{result.word || 'Unknown'}"</div>
+              <div className="polaroid-caption">"{displayWord}"</div>
             </div>
           </div>
         )}
         
         <div className="result-details">
           <div className="result-card">
-            <h3 className="result-word">"{result.word || 'Unknown'}"</h3>
+            <h3 className="result-word">"{displayWord}"</h3>
             <div className="result-stats">
               <div className="stat-item">
                 <span className="stat-label">Level:</span>
