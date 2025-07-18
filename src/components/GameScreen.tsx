@@ -72,10 +72,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
   const handleDrawingEnd = () => {
     setIsDrawing(false);
-    // Auto-submit when drawing ends (mouse/touch release)
-    if (hasStartedDrawing && gameActive) {
-      handleSubmitDrawing();
-    }
+    // Auto-submit when drawing ends (left mouse button release)
+    handleSubmitDrawing();
   };
 
   const handleSubmitDrawing = () => {
