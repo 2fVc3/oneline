@@ -28,6 +28,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   // Get word for current level
   useEffect(() => {
     const word = getWordForLevel(level);
+    console.log('Generated word for level', level, ':', word); // Debug log
     setCurrentWord(word);
   }, [level]);
 
@@ -54,6 +55,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
   const handleTimeUp = useCallback(() => {
     setGameActive(false);
+    console.log('Time up for word:', currentWord); // Debug log
     onGameComplete({
       word: currentWord,
       completed: false,
@@ -73,17 +75,20 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     setIsDrawing(false);
     setCapturedImage(imageData);
     // Auto-submit when drawing ends with polaroid image
-    handleSubmitDrawing(imageData);
+    setTimeout(() => {
+      handleSubmitDrawing(imageData);
+    }, 100);
   };
 
-  const handleSubmitDrawing = (imageData?: string) => {
+  const handleSubmitDrawing = (imageData: string) => {
     setGameActive(false);
+    console.log('Submitting drawing for word:', currentWord); // Debug log
     onGameComplete({
       word: currentWord,
       completed: true,
       timeLeft,
       level,
-      drawingImage: imageData || capturedImage
+      drawingImage: imageData
     });
   };
 

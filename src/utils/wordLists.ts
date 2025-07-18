@@ -59,7 +59,9 @@ export const getWordForLevel = (level: number): string => {
   
   // Add some randomness but ensure progression
   const randomIndex = Math.floor(Math.random() * wordPool.length);
-  return wordPool[randomIndex];
+  const selectedWord = wordPool[randomIndex];
+  console.log('getWordForLevel - Level:', level, 'Selected word:', selectedWord); // Debug log
+  return selectedWord;
 };
 
 // Get difficulty label for level

@@ -27,6 +27,7 @@ function App() {
   };
 
   const handleGameComplete = (result: GameResult) => {
+    console.log('App received game result:', result); // Debug log
     setGameResult(result);
     if (result.completed) {
       setCurrentLevel(prev => prev + 1);

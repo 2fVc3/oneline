@@ -17,6 +17,10 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
 }) => {
   const isSuccess = result.completed && result.timeLeft > 0;
   
+  // Debug log to check if word is being received
+  console.log('GameOverScreen received result:', result);
+  console.log('Word from result:', result.word);
+  
   return (
     <div className="game-over-screen">
       <div className="game-over-container">
@@ -39,14 +43,14 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
           <div className="polaroid-container">
             <div className="polaroid">
               <img src={result.drawingImage} alt="Your drawing" className="polaroid-image" />
-              <div className="polaroid-caption">"{result.word}"</div>
+              <div className="polaroid-caption">"{result.word || 'Unknown'}"</div>
             </div>
           </div>
         )}
         
         <div className="result-details">
           <div className="result-card">
-            <h3 className="result-word">"{result.word}"</h3>
+            <h3 className="result-word">"{result.word || 'Unknown'}"</h3>
             <div className="result-stats">
               <div className="stat-item">
                 <span className="stat-label">Level:</span>
